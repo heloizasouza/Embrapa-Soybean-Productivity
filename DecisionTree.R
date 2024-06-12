@@ -107,12 +107,12 @@ soybean_data %>%
 
 
 ##### Densidade por CICLO
-sample_size = soybean_data %>% group_by(Ciclo4) %>% summarize(num=n())
+sample_size = soybean_data %>% group_by(Cycle4) %>% summarize(num=n())
 
 soybean_data %>%
   left_join(sample_size) %>%
-  mutate(myaxis = paste0(Ciclo4, "\n", "n=", num)) %>%
-  ggplot(aes(x=myaxis, y=kgha, fill=Ciclo4)) +
+  mutate(myaxis = paste0(Cycle4, "\n", "n=", num)) %>%
+  ggplot(aes(x=myaxis, y=kgha, fill=Cycle4)) +
   geom_violin(width=1.4) +
   theme(
     legend.position="none",
@@ -123,11 +123,11 @@ soybean_data %>%
 
 
 ##### Densidade por CICLO e CLIMA
-sample_size = soybean_data %>% group_by(Ciclo4, Clima) %>% summarize(num=n())
+sample_size = soybean_data %>% group_by(Cycle4, Clima) %>% summarize(num=n())
 
 soybean_data %>%
   left_join(sample_size) %>%
-  mutate(myaxis = paste0(Ciclo4, "\n", Clima, "\n", "n=", num)) %>%
+  mutate(myaxis = paste0(Cycle4, "\n", Clima, "\n", "n=", num)) %>%
   ggplot(aes(x=myaxis, y=kgha)) +
   geom_violin(width=1.4, aes(fill = Solo)) +
   # scale_fill_viridis(discrete = TRUE) +
@@ -148,7 +148,7 @@ ggplot(data = soybean_data, mapping = aes(x = Ano, y = kgha)) +
 
 ##### perfil médio do Ciclo de Colheita
 ggplot(data = soybean_data, mapping = aes(x = Ano, y = kgha)) +
-  stat_summary(aes(colour = Ciclo4), fun = "mean", geom = "line") + 
+  stat_summary(aes(colour = Cycle4), fun = "mean", geom = "line") + 
   theme_light()
 
 
@@ -159,12 +159,12 @@ ggplot(soybean_data, aes(x = Cultivar, y = kgha)) +
 
 # gráfico em painéis por Solo e Ciclo
 ggplot(soybean_data, aes(x = Caracteristica, y = kgha)) + 
-  geom_boxplot() + facet_grid(Solo~Ciclo4) +
+  geom_boxplot() + facet_grid(Solo~Cycle4) +
   theme_light()
 
 
 # coeficiente de variacao por experimento
-cv = soybean_data |> group_by(id) |> summarise(cv(kgha))
+cv = soybean_data |> group_by(ID) |> summarise(goeveg::cv(kgha))
 
 
 
@@ -486,3 +486,135 @@ predictions.dt2 <- predict(object = mod2.dt, newdata = test.dt, type = "class")
 # matriz de confusão
 CM.dt2 <- confusionMatrix(data = predictions.dt2, reference = test.dt$kghaCluster);CM.dt2
 
+
+
+# Average Productivity ----------------------------------------------------
+
+
+# production cost indicator
+indicador <- function(x) (4641.71/mean(x))
+
+
+set.seed(2233)
+colnames(dados_soja)[sample(10:33,12)]
+
+# accuracy 78,52%
+mod2.dt <- rpart(formula = kghaCluster ~ Solo + Cycle4 +
+                   RH2M_phase2+T2M_MAX_phase1+PRECTOT_phase3+RH2M_phase1+
+                   WS2M_phase2+WS2M_phase3+T2M_MIN_phase3+RADIATION_phase2+
+                   PRECTOT_phase2+PRECTOT_phase1+RADIATION_phase3+T2MDEW_phase3,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod2.dt, type = 5)
+# Importance of the variable in percentage
+# Importância da variável em percentual
+(varImp(mod2.dt)/sum(varImp(mod2.dt)))*100
+
+
+# average productivity for each branch of the tree
+# produtividade média por caminho da árvore
+
+
+# Average Productivity for the High branch (23%)
+soybean_data |>
+  filter(RH2M_phase2 == "Low") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+
+# Average Productivity for the Middle branch (32%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Low" | PRECTOT_phase1 == "High") |>
+  filter(RADIATION_phase3 == "Low" | RADIATION_phase3 == "Middle") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+
+# Average Productivity for the High branch (2%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Low" | PRECTOT_phase1 == "High") |>
+  filter(RADIATION_phase3 == "High") |>
+  filter(PRECTOT_phase3 == "High") |>
+  filter(Cycle4 == "Medio") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+
+# Average Productivity for the Middle branch (3%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Low" | PRECTOT_phase1 == "High") |>
+  filter(RADIATION_phase3 == "High") |>
+  filter(PRECTOT_phase3 == "High") |>
+  filter(Cycle4 == "Tardio") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+
+# Average Productivity for the Middle branch (1%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Low" | PRECTOT_phase1 == "High") |>
+  filter(RADIATION_phase3 == "High") |>
+  filter(PRECTOT_phase3 == "Middle") |>
+  filter(Solo == "Latossolo") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+
+# Average Productivity for the Low branch (2%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Low" | PRECTOT_phase1 == "High") |>
+  filter(RADIATION_phase3 == "High") |>
+  filter(PRECTOT_phase3 == "Middle") |>
+  filter(Solo == "Plintossolo") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+
+# Average Productivity for the Middle branch (12%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Middle") |>
+  filter(Solo == "Latossolo") |>
+  filter(RADIATION_phase3 == "Low" | RADIATION_phase3 == "Middle") |>
+  filter(T2M_MIN_phase3 == "Low" | T2M_MIN_phase3 == "High") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+  
+# Average Productivity for the Middle branch (3%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Middle") |>
+  filter(Solo == "Latossolo") |>
+  filter(RADIATION_phase3 == "Low" | RADIATION_phase3 == "Middle") |>
+  filter(T2M_MIN_phase3 == "Middle") |>
+  filter(Cycle4 == "Precoce") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+
+# Average Productivity for the Low branch (6%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Middle") |>
+  filter(Solo == "Latossolo") |>
+  filter(RADIATION_phase3 == "Low" | RADIATION_phase3 == "Middle") |>
+  filter(T2M_MIN_phase3 == "Middle") |>
+  filter(Cycle4 == "Super Precoce" | Cycle4 == "Medio") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+
+# Average Productivity for the Low branch (4%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Middle") |>
+  filter(Solo == "Latossolo") |>
+  filter(RADIATION_phase3 == "High") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
+
+# Average Productivity for the Low branch (12%)
+soybean_data |>
+  filter(RH2M_phase2 == "Middle" | RH2M_phase2 == "High") |>
+  filter(PRECTOT_phase1 == "Middle") |>
+  filter(Solo == "Plintossolo") |>
+  select(kgha) |>
+  summarise_all(.funs = c(mean, indicador))
