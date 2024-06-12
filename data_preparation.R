@@ -183,4 +183,842 @@ soybean_data <- left_join(x = soybean_data, y = EC1, by = "ID")
 soybean_data <- left_join(x = soybean_data, y = EC2, by = "ID")
 
 # escrevendo o conjunto de dados final
-write.csv(x = soybean_data, file = "soybean_data-v2.csv")
+write.csv(x = soybean_data, file = "Input/soybean_data-v2.csv", row.names = FALSE)
+
+
+
+# Clustering Covariables --------------------------------------------------
+
+# clearing memory
+rm(list = ls())
+
+# loading data version 2
+soybean_data <- read.csv(file = "Input/soybean_data-v2.csv")
+
+
+### CLUSTER KGHA ####
+
+dados2 <- soybean_data |>
+  dplyr::select(kgha)
+
+# Seed definition to ensure reproducibility
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Application of the sinuette method
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
+  labs(title = "Silhouette method - kgha")
+
+# Application of the elbow method
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss") +
+  labs(title = "Wss method - kgha")
+
+ggpubr::ggarrange(g1,g2)
+
+# clustering using kmeans
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(kghaCluster = factor(x = kmcluster$cluster, levels = c("2","3","1"),
+                              labels = c("Low","Middle","High")))
+
+# making prediction to delimit the limits of each level of the clusters
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(kgha = seq(min(soybean_data$kgha),max(soybean_data$kgha),1),
+                       cluster = predict(kmcluster, seq(min(soybean_data$kgha),max(soybean_data$kgha),1)))
+# checking cluster boundaries
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER RH2M_mean_70. ####
+
+dados2 <- soybean_data |>
+  dplyr::select(RH2M_mean_70.)
+
+# # Seed definition to ensure reproducibility # Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
+  labs(title = "Silhouette method - RH2M-70+")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Wss method - RH2M-70+")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(RH2M_phase3 = factor(x = kmcluster$cluster, levels = c("1","3","2"),
+                              labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(RH2M_mean_70. = seq(min(soybean_data$RH2M_mean_70.),max(soybean_data$RH2M_mean_70.),0.0001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$RH2M_mean_70.),max(soybean_data$RH2M_mean_70.),0.0001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER RH2M_mean_45.70 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(RH2M_mean_45.70)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - RH2M_45-70")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - RH2M_45-70")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(RH2M_phase2 = factor(x = kmcluster$cluster, levels = c("1","3","2"),
+                              labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(RH2M_mean_45.70 = seq(min(soybean_data$RH2M_mean_45.70),max(soybean_data$RH2M_mean_45.70),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$RH2M_mean_45.70),max(soybean_data$RH2M_mean_45.70),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER RH2M_mean_0.45 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(RH2M_mean_0.45)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - RH2M_0-45")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - RH2M_0-45")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(RH2M_phase1 = factor(x = kmcluster$cluster, levels = c("2","1","3"),
+                              labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(RH2M_mean_0.45 = seq(min(soybean_data$RH2M_mean_0.45),max(soybean_data$RH2M_mean_0.45),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$RH2M_mean_0.45),max(soybean_data$RH2M_mean_0.45),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER T2M_MAX_mean_70. ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2M_MAX_mean_70.)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, fdm2id::KMEANS, method = "silhouette") +
+  labs(title = "Silhouette method - T2M_MAX-70+")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, fdm2id::KMEANS, method = "wss", k.max = 10) +
+  labs(title = "Wss method - T2M_MAX-70+")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2M_MAX_phase3 = factor(x = kmcluster$cluster, levels = c("1","2","3"),
+                                 labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2M_MAX_mean_70. = seq(min(soybean_data$T2M_MAX_mean_70.),max(soybean_data$T2M_MAX_mean_70.),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2M_MAX_mean_70.),max(soybean_data$T2M_MAX_mean_70.),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER T2M_MAX_mean_45.70 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2M_MAX_mean_45.70)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - T2M_MAX_45-70")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - T2M_MAX_45-70")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 2)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2M_MAX_phase2 = factor(x = kmcluster$cluster, levels = c("1","2"),
+                                 labels = c("Low","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2M_MAX_mean_45.70 = seq(min(soybean_data$T2M_MAX_mean_45.70),max(soybean_data$T2M_MAX_mean_45.70),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2M_MAX_mean_45.70),max(soybean_data$T2M_MAX_mean_45.70),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2M_MAX_mean_0.45 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2M_MAX_mean_0.45)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - T2M_MAX_0-45")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - T2M_MAX_0-45")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 2)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2M_MAX_phase1 = factor(x = kmcluster$cluster, levels = c("1","2"),
+                                 labels = c("Low","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2M_MAX_mean_0.45 = seq(min(soybean_data$T2M_MAX_mean_0.45),max(soybean_data$T2M_MAX_mean_0.45),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2M_MAX_mean_0.45),max(soybean_data$T2M_MAX_mean_0.45),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2M_mean_70. ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2M_mean_70.)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
+  labs(title = "Silhouette method - T2M-70+")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Wss method - T2M-70+")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2M_phase3 = factor(x = kmcluster$cluster, levels = c("2","1","3"),
+                             labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2M_mean_70. = seq(min(soybean_data$T2M_mean_70.),max(soybean_data$T2M_mean_70.),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2M_mean_70.),max(soybean_data$T2M_mean_70.),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2M_mean_45.70 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2M_mean_45.70)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - T2M_45-70")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - T2M_45-70")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 2)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2M_phase2 = factor(x = kmcluster$cluster, levels = c("1","2"),
+                             labels = c("Low","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2M_mean_45.70 = seq(min(soybean_data$T2M_mean_45.70),max(soybean_data$T2M_mean_45.70),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2M_mean_45.70),max(soybean_data$T2M_mean_45.70),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2M_mean_0.45 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2M_mean_0.45)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - T2M_0-45")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - T2M_0-45")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 2)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2M_phase1 = factor(x = kmcluster$cluster, levels = c("1","2"),
+                             labels = c("Low","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2M_mean_0.45 = seq(min(soybean_data$T2M_mean_0.45),max(soybean_data$T2M_mean_0.45),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2M_mean_0.45),max(soybean_data$T2M_mean_0.45),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2M_MIN_mean_70. ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2M_MIN_mean_70.)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
+  labs(title = "Silhouette method - T2M_MIN_70+")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Wss method - T2M_MIN_70+")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2M_MIN_phase3 = factor(x = kmcluster$cluster, levels = c("2","1","3"),
+                                 labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2M_MIN_mean_70. = seq(min(soybean_data$T2M_MIN_mean_70.),max(soybean_data$T2M_MIN_mean_70.),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2M_MIN_mean_70.),max(soybean_data$T2M_MIN_mean_70.),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2M_MIN_mean_45.70 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2M_MIN_mean_45.70)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - T2M_MIN_45-70")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - T2M_MIN_45-70")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 2)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2M_MIN_phase2 = factor(x = kmcluster$cluster, levels = c("1","2"),
+                                 labels = c("Low","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2M_MIN_mean_45.70 = seq(min(soybean_data$T2M_MIN_mean_45.70),max(soybean_data$T2M_MIN_mean_45.70),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2M_MIN_mean_45.70),max(soybean_data$T2M_MIN_mean_45.70),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2M_MIN_mean_0.45 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2M_MIN_mean_0.45)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - T2M_MIN_0-45")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - T2M_MIN_0-45")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2M_MIN_phase1 = factor(x = kmcluster$cluster, levels = c("1","3","2"),
+                                 labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2M_MIN_mean_0.45 = seq(min(soybean_data$T2M_MIN_mean_0.45),max(soybean_data$T2M_MIN_mean_0.45),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2M_MIN_mean_0.45),max(soybean_data$T2M_MIN_mean_0.45),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2MDEW_mean_45.70 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2MDEW_mean_45.70)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - T2MDEW_45-70")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - T2MDEW_45-70")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2MDEW_phase2 = factor(x = kmcluster$cluster, levels = c("1","2","3"),
+                                labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2MDEW_mean_45.70 = seq(min(soybean_data$T2MDEW_mean_45.70),max(soybean_data$T2MDEW_mean_45.70),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2MDEW_mean_45.70),max(soybean_data$T2MDEW_mean_45.70),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2MDEW_mean_0.45 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2MDEW_mean_0.45)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - T2MDEW_0-45")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - T2MDEW_0-45")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 2)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2MDEW_phase1 = factor(x = kmcluster$cluster, levels = c("1","2"),
+                                labels = c("Low","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2MDEW_mean_0.45 = seq(min(soybean_data$T2MDEW_mean_0.45),max(soybean_data$T2MDEW_mean_0.45),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2MDEW_mean_0.45),max(soybean_data$T2MDEW_mean_0.45),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+
+### CLUSTER T2MDEW_mean_70. ####
+
+dados2 <- soybean_data |>
+  dplyr::select(T2MDEW_mean_70.)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
+  labs(title = "Silhouette method - T2MDEW-70+")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Wss method - T2MDEW-70+")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(T2MDEW_phase3 = factor(x = kmcluster$cluster, levels = c("3","1","2"),
+                                labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(T2MDEW_mean_70. = seq(min(soybean_data$T2MDEW_mean_70.),max(soybean_data$T2MDEW_mean_70.),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$T2MDEW_mean_70.),max(soybean_data$T2MDEW_mean_70.),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER WS2M_mean_70. ####
+
+dados2 <- soybean_data |>
+  dplyr::select(WS2M_mean_70.)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
+  labs(title = "Silhouette method - WS2M_70+")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Wss method - WS2M_70+")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(WS2M_phase3 = factor(x = kmcluster$cluster, levels = c("3","1","2"),
+                              labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(WS2M_mean_70. = seq(min(soybean_data$WS2M_mean_70.),max(soybean_data$WS2M_mean_70.),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$WS2M_mean_70.),max(soybean_data$WS2M_mean_70.),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER WS2M_mean_45.70 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(WS2M_mean_45.70)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - WS2M_45-70")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - WS2M_45-70")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 2)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(WS2M_phase2 = factor(x = kmcluster$cluster, levels = c("2","1"),
+                              labels = c("Low","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(WS2M_mean_45.70 = seq(min(soybean_data$WS2M_mean_45.70),max(soybean_data$WS2M_mean_45.70),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$WS2M_mean_45.70),max(soybean_data$WS2M_mean_45.70),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER WS2M_mean_0.45 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(WS2M_mean_0.45)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - WS2M_0-45")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - WS2M_0-45")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(WS2M_phase1 = factor(x = kmcluster$cluster, levels = c("3","2","1"),
+                              labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(WS2M_mean_0.45 = seq(min(soybean_data$WS2M_mean_0.45),max(soybean_data$WS2M_mean_0.45),0.001),
+                       cluster = predict(kmcluster, seq(min(soybean_data$WS2M_mean_0.45),max(soybean_data$WS2M_mean_0.45),0.001)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER ALLSKY_SFC_LW_DWN_sum_70. ####
+
+dados2 <- soybean_data |>
+  dplyr::select(ALLSKY_SFC_LW_DWN_sum_70.)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
+  labs(title = "Silhouette method - \nALLSKY_SFC_LW_DWN_phase3")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Wss method - \nALLSKY_SFC_LW_DWN_phase3")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(RADIATION_phase3 = factor(x = kmcluster$cluster, levels = c("3","2","1"),
+                                   labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(ALLSKY_SFC_LW_DWN_sum_70. = seq(min(soybean_data$ALLSKY_SFC_LW_DWN_sum_70.),max(soybean_data$ALLSKY_SFC_LW_DWN_sum_70.),1),
+                       cluster = predict(kmcluster, seq(min(soybean_data$ALLSKY_SFC_LW_DWN_sum_70.),max(soybean_data$ALLSKY_SFC_LW_DWN_sum_70.),1)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER ALLSKY_SFC_LW_DWN_sum_45.70 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(ALLSKY_SFC_LW_DWN_sum_45.70)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - \nALLSKY_SFC_LW_DWN_phase2")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - \nALLSKY_SFC_LW_DWN_phase2")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(RADIATION_phase2 = factor(x = kmcluster$cluster, levels = c("3","1","2"),
+                                   labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(ALLSKY_SFC_LW_DWN_sum_45.70 = seq(min(soybean_data$ALLSKY_SFC_LW_DWN_sum_45.70),max(soybean_data$ALLSKY_SFC_LW_DWN_sum_45.70),1),
+                       cluster = predict(kmcluster, seq(min(soybean_data$ALLSKY_SFC_LW_DWN_sum_45.70),max(soybean_data$ALLSKY_SFC_LW_DWN_sum_45.70),1)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER ALLSKY_SFC_LW_DWN_sum_0.45 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(ALLSKY_SFC_LW_DWN_sum_0.45)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - \nALLSKY_SFC_LW_DWN_phase1")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - \nALLSKY_SFC_LW_DWN_phase1")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(RADIATION_phase1 = factor(x = kmcluster$cluster, levels = c("3","1","2"),
+                                   labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(ALLSKY_SFC_LW_DWN_sum_0.45 = seq(min(soybean_data$ALLSKY_SFC_LW_DWN_sum_0.45),max(soybean_data$ALLSKY_SFC_LW_DWN_sum_0.45),1),
+                       cluster = predict(kmcluster, seq(min(soybean_data$ALLSKY_SFC_LW_DWN_sum_0.45),max(soybean_data$ALLSKY_SFC_LW_DWN_sum_0.45),1)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER PRECTOT_sum_70. ####
+
+dados2 <- soybean_data |>
+  dplyr::select(PRECTOT_sum_70.)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
+  labs(title = "Silhouette method - PRECTOT_70+")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Wss method - PRECTOT_70+")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(PRECTOT_phase3 = factor(x = kmcluster$cluster, levels = c("3","2","1"),
+                                 labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(PRECTOT_sum_70. = seq(min(soybean_data$PRECTOT_sum_70.),max(soybean_data$PRECTOT_sum_70.),1),
+                       cluster = predict(kmcluster, seq(min(soybean_data$PRECTOT_sum_70.),max(soybean_data$PRECTOT_sum_70.),1)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER PRECTOT_sum_45.70 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(PRECTOT_sum_45.70)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - PRECTOT_45-70")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - PRECTOT_45-70")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(PRECTOT_phase2 = factor(x = kmcluster$cluster, levels = c("2","1","3"),
+                                 labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(PRECTOT_sum_45.70 = seq(min(soybean_data$PRECTOT_sum_45.70),max(soybean_data$PRECTOT_sum_45.70),1),
+                       cluster = predict(kmcluster, seq(min(soybean_data$PRECTOT_sum_45.70),max(soybean_data$PRECTOT_sum_45.70),1)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+### CLUSTER PRECTOT_sum_0.45 ####
+
+dados2 <- soybean_data |>
+  dplyr::select(PRECTOT_sum_0.45)
+
+# Definição da semente para garantir reprodutibilidade
+set.seed(123)
+
+# Aplicação do método de sinueta
+g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9) +
+  labs(title = "Silhouette method - PRECTOT_0-45")
+
+# Aplicação do método de cotevelo
+g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Wss method - PRECTOT_0-45")
+
+ggpubr::ggarrange(g1,g2)
+
+set.seed(123)
+kmcluster <- fdm2id::KMEANS(d = dados2, k = 3)
+kmcluster$centers
+soybean_data <- soybean_data |> 
+  mutate(PRECTOT_phase1 = factor(x = kmcluster$cluster, levels = c("2","1","3"),
+                                 labels = c("Low","Middle","High")))
+
+# fazendo predição para delimitar os limites de cada nível dos clusters
+predicao <- data.frame(PRECTOT_sum_0.45 = seq(min(soybean_data$PRECTOT_sum_0.45),max(soybean_data$PRECTOT_sum_0.45),1),
+                       cluster = predict(kmcluster, seq(min(soybean_data$PRECTOT_sum_0.45),max(soybean_data$PRECTOT_sum_0.45),1)))
+# verificando os limites dos clusters
+predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+
+
+write.csv(x = soybean_data, file = "soybean_data.csv", row.names = FALSE)
+soybean_data <- read.csv(file = "soybean_data.csv")
+
+
+
+
+
+write.csv(x = soybean_data, file = "Input/soybean_data-v3.csv", row.names = FALSE)
