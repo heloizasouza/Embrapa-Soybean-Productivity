@@ -5,7 +5,8 @@ rm(list = ls())
 # Libraries ---------------------------------------------------------------
 
 library(tidyverse)
-
+library(rpart.plot)
+library(caret)
 
 
 # Data Loading ------------------------------------------------------------
@@ -67,6 +68,7 @@ train.dt <- dados_soja |>
 test.dt <- dados_soja |>
   slice(-trainId) 
 
+attach(dados_soja)
 
 # Descriptive Analysis ----------------------------------------------------
 
@@ -165,4 +167,322 @@ ggplot(soybean_data, aes(x = Caracteristica, y = kgha)) +
 cv = soybean_data |> group_by(id) |> summarise(cv(kgha))
 
 
+
+
+
+
+# Decision Tree Model -----------------------------------------------------
+
+
+
+#### set.seed(2024) -- Acurácia de 77,85% -- TEM SOLO ----
+
+set.seed(2024)
+colnames(dados_soja)[sample(10:33,12)]
+
+# accuracy 74,5%
+mod1.dt <- rpart(formula = kghaCluster ~ Solo + Cycle3 +
+                   RH2M_phase2+T2M_MAX_phase2+T2MDEW_phase2+WS2M_phase2+
+                   PRECTOT_phase3+T2M_phase1+PRECTOT_phase1+T2M_MIN_phase2+
+                   WS2M_phase3+RADIATION_phase2+T2MDEW_phase1+T2M_MIN_phase1,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod1.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt1 <- predict(object = mod1.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt1 <- confusionMatrix(data = predictions.dt1, reference = test.dt$kghaCluster);CM.dt1
+
+# accuracy 77,85%
+mod2.dt <- rpart(formula = kghaCluster ~ Solo + Cycle4 +
+                   RH2M_phase2+T2M_MAX_phase2+T2MDEW_phase2+WS2M_phase2+
+                   PRECTOT_phase3+T2M_phase1+PRECTOT_phase1+T2M_MIN_phase2+
+                   WS2M_phase3+RADIATION_phase2+T2MDEW_phase1+T2M_MIN_phase1,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod2.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt2 <- predict(object = mod2.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt2 <- confusionMatrix(data = predictions.dt2, reference = test.dt$kghaCluster);CM.dt2
+
+
+5
+#### set.seed(123) -- Acurácia de 76,51% -- TEM SOLO ----
+
+set.seed(123)
+colnames(dados_soja)[sample(10:33,12)]
+
+# accuracy 76,51%
+mod1.dt <- rpart(formula = kghaCluster ~ Solo + Cycle3 +
+                   T2MDEW_phase3+RADIATION_phase3+T2MDEW_phase1+RH2M_phase1+
+                   T2M_MIN_phase3+WS2M_phase1+T2M_MIN_phase2+T2M_MAX_phase2+
+                   T2M_MAX_phase3+PRECTOT_phase3+T2M_MAX_phase1+T2M_phase1,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod1.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt1 <- predict(object = mod1.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt1 <- confusionMatrix(data = predictions.dt1, reference = test.dt$kghaCluster);CM.dt1
+
+# accuracy 76,51%
+mod2.dt <- rpart(formula = kghaCluster ~ Solo + Cycle4 +
+                   T2MDEW_phase3+RADIATION_phase3+T2MDEW_phase1+RH2M_phase1+
+                   T2M_MIN_phase3+WS2M_phase1+T2M_MIN_phase2+T2M_MAX_phase2+
+                   T2M_MAX_phase3+PRECTOT_phase3+T2M_MAX_phase1+T2M_phase1,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod2.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt2 <- predict(object = mod2.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt2 <- confusionMatrix(data = predictions.dt2, reference = test.dt$kghaCluster);CM.dt2
+
+
+
+#### set.seed(22) -- Acurácia de 78,52% -- TEM SOLO ----
+
+set.seed(22)
+colnames(dados_soja)[sample(10:33,12)]
+
+# accuracy 74,83%
+mod1.dt <- rpart(formula = kghaCluster ~ Solo + Cycle3 +
+                   T2M_MAX_phase1+T2M_phase1+T2M_MIN_phase3+T2M_MIN_phase1+
+                   WS2M_phase2+T2M_MAX_phase2+T2M_MIN_phase2+RH2M_phase1+
+                   WS2M_phase3+T2M_MAX_phase3+PRECTOT_phase3+T2M_phase2,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod1.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt1 <- predict(object = mod1.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt1 <- confusionMatrix(data = predictions.dt1, reference = test.dt$kghaCluster);CM.dt1
+
+# accuracy 78,52%
+mod2.dt <- rpart(formula = kghaCluster ~ Solo + Cycle4 +
+                   T2M_MAX_phase1+T2M_phase1+T2M_MIN_phase3+T2M_MIN_phase1+
+                   WS2M_phase2+T2M_MAX_phase2+T2M_MIN_phase2+RH2M_phase1+
+                   WS2M_phase3+T2M_MAX_phase3+PRECTOT_phase3+T2M_phase2,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod2.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt2 <- predict(object = mod2.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt2 <- confusionMatrix(data = predictions.dt2, reference = test.dt$kghaCluster);CM.dt2
+
+
+
+#### set.seed(2020) -- Acurácia de 78,52% -- TEM SOLO ----
+
+set.seed(2020)
+colnames(dados_soja)[sample(10:33,12)]
+
+# accuracy 75,84%
+mod1.dt <- rpart(formula = kghaCluster ~ Solo + Cycle3 +
+                   T2M_MIN_phase1+PRECTOT_phase2+PRECTOT_phase3+RH2M_phase3+
+                   WS2M_phase2+T2M_MAX_phase3+T2M_MIN_phase3+T2M_MAX_phase1+
+                   RADIATION_phase1+T2MDEW_phase2+T2M_phase2+T2MDEW_phase1,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod1.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt1 <- predict(object = mod1.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt1 <- confusionMatrix(data = predictions.dt1, reference = test.dt$kghaCluster);CM.dt1
+
+# accuracy 78,52%
+mod2.dt <- rpart(formula = kghaCluster ~ Solo + Cycle4 +
+                   T2M_MIN_phase1+PRECTOT_phase2+PRECTOT_phase3+RH2M_phase3+
+                   WS2M_phase2+T2M_MAX_phase3+T2M_MIN_phase3+T2M_MAX_phase1+
+                   RADIATION_phase1+T2MDEW_phase2+T2M_phase2+T2MDEW_phase1,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod2.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt2 <- predict(object = mod2.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt2 <- confusionMatrix(data = predictions.dt2, reference = test.dt$kghaCluster);CM.dt2
+
+
+
+#### set.seed(725) -- Acurácia de 78,52% -- TEM SOLO ----
+
+set.seed(725)
+colnames(dados_soja)[sample(10:33,12)]
+
+# accuracy 75,17%
+mod1.dt <- rpart(formula = kghaCluster ~ Solo + Cycle3 +
+                   RH2M_phase1+T2M_phase1+RH2M_phase2+PRECTOT_phase2+
+                   RADIATION_phase3+WS2M_phase3+T2M_MIN_phase1+T2M_MAX_phase2+
+                   PRECTOT_phase1+T2M_MIN_phase2+WS2M_phase2+T2M_phase3,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod1.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt1 <- predict(object = mod1.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt1 <- confusionMatrix(data = predictions.dt1, reference = test.dt$kghaCluster);CM.dt1
+
+# accuracy 78,52%
+mod2.dt <- rpart(formula = kghaCluster ~ Solo + Cycle4 +
+                   RH2M_phase1+T2M_phase1+RH2M_phase2+PRECTOT_phase2+
+                   RADIATION_phase3+WS2M_phase3+T2M_MIN_phase1+T2M_MAX_phase2+
+                   PRECTOT_phase1+T2M_MIN_phase2+WS2M_phase2+T2M_phase3,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod2.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt2 <- predict(object = mod2.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt2 <- confusionMatrix(data = predictions.dt2, reference = test.dt$kghaCluster);CM.dt2
+
+
+
+#### set.seed(13) -- Acurácia de 77,85% -- TEM SOLO ----
+
+set.seed(13)
+colnames(dados_soja)[sample(10:33,12)]
+
+# accuracy 77,18%
+mod1.dt <- rpart(formula = kghaCluster ~ Solo + Cycle3 +
+                   PRECTOT_phase1+RH2M_phase1+T2M_MAX_phase2+T2M_MIN_phase3+
+                   T2MDEW_phase2+T2M_MAX_phase1+WS2M_phase3+T2M_MAX_phase3+
+                   WS2M_phase1+RADIATION_phase2+T2M_MIN_phase1+T2M_phase2,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod1.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt1 <- predict(object = mod1.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt1 <- confusionMatrix(data = predictions.dt1, reference = test.dt$kghaCluster);CM.dt1
+
+# accuracy 77,85%
+mod2.dt <- rpart(formula = kghaCluster ~ Solo + Cycle4 +
+                   PRECTOT_phase1+RH2M_phase1+T2M_MAX_phase2+T2M_MIN_phase3+
+                   T2MDEW_phase2+T2M_MAX_phase1+WS2M_phase3+T2M_MAX_phase3+
+                   WS2M_phase1+RADIATION_phase2+T2M_MIN_phase1+T2M_phase2,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod2.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt2 <- predict(object = mod2.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt2 <- confusionMatrix(data = predictions.dt2, reference = test.dt$kghaCluster);CM.dt2
+
+
+
+
+#### set.seed(2233) -- Acurácia de 78,52% -- TEM SOLO ----
+
+set.seed(2233)
+colnames(dados_soja)[sample(10:33,12)]
+
+# accuracy 74,16%
+mod1.dt <- rpart(formula = kghaCluster ~ Solo + Cycle3 +
+                   RH2M_phase2+T2M_MAX_phase1+PRECTOT_phase3+RH2M_phase1+
+                   WS2M_phase2+WS2M_phase3+T2M_MIN_phase3+RADIATION_phase2+
+                   PRECTOT_phase2+PRECTOT_phase1+RADIATION_phase3+T2MDEW_phase3,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod1.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt1 <- predict(object = mod1.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt1 <- confusionMatrix(data = predictions.dt1, reference = test.dt$kghaCluster);CM.dt1
+
+# accuracy 78,52%
+mod2.dt <- rpart(formula = kghaCluster ~ Solo + Cycle4 +
+                   RH2M_phase2+T2M_MAX_phase1+PRECTOT_phase3+RH2M_phase1+
+                   WS2M_phase2+WS2M_phase3+T2M_MIN_phase3+RADIATION_phase2+
+                   PRECTOT_phase2+PRECTOT_phase1+RADIATION_phase3+T2MDEW_phase3,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod2.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt2 <- predict(object = mod2.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt2 <- confusionMatrix(data = predictions.dt2, reference = test.dt$kghaCluster);CM.dt2
+
+
+
+#### set.seed(597) -- Acurácia de 78,52% -- TEM SOLO ----
+
+set.seed(597)
+colnames(dados_soja)[sample(10:33,12)]
+
+# accuracy 74,83%
+mod1.dt <- rpart(formula = kghaCluster ~ Solo + Cycle3 +
+                   T2M_MIN_phase3+PRECTOT_phase3+PRECTOT_phase2+T2M_MIN_phase2+
+                   T2MDEW_phase2+T2MDEW_phase3+WS2M_phase2+RADIATION_phase1+
+                   T2M_phase1+T2M_phase2+T2M_MAX_phase3+T2M_MAX_phase1,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod1.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt1 <- predict(object = mod1.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt1 <- confusionMatrix(data = predictions.dt1, reference = test.dt$kghaCluster);CM.dt1
+
+# accuracy 78,52%
+mod2.dt <- rpart(formula = kghaCluster ~ Solo + Cycle4 +
+                   T2M_MIN_phase3+PRECTOT_phase3+PRECTOT_phase2+T2M_MIN_phase2+
+                   T2MDEW_phase2+T2MDEW_phase3+WS2M_phase2+RADIATION_phase1+
+                   T2M_phase1+T2M_phase2+T2M_MAX_phase3+T2M_MAX_phase1,
+                 data = train.dt, method = "class")
+# decision tree plot
+# gráfico da árvore de decisão
+rpart.plot(x = mod2.dt, type = 5)
+# decision tree prediction
+# predição da árvore de decisão
+predictions.dt2 <- predict(object = mod2.dt, newdata = test.dt, type = "class")
+# confusion matrix
+# matriz de confusão
+CM.dt2 <- confusionMatrix(data = predictions.dt2, reference = test.dt$kghaCluster);CM.dt2
 
