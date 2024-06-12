@@ -1014,11 +1014,5 @@ predicao <- data.frame(PRECTOT_sum_0.45 = seq(min(soybean_data$PRECTOT_sum_0.45)
 predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
 
 
-write.csv(x = soybean_data, file = "soybean_data.csv", row.names = FALSE)
-soybean_data <- read.csv(file = "soybean_data.csv")
-
-
-
-
 
 write.csv(x = soybean_data, file = "Input/soybean_data-v3.csv", row.names = FALSE)
