@@ -215,6 +215,9 @@ g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
 g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss") +
   labs(title = "Wss method - kgha")
 
+G1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss") +
+  labs(title = "Método do Cotovelo - kgha")
+
 ggpubr::ggarrange(g1,g2)
 
 # clustering using kmeans
@@ -229,9 +232,20 @@ soybean_data <- soybean_data |>
 # fazendo predição para delimitar os limites de cada nível dos clusters
 predicao <- data.frame(kgha = seq(min(soybean_data$kgha),max(soybean_data$kgha),1),
                        cluster = predict(kmcluster, seq(min(soybean_data$kgha),max(soybean_data$kgha),1)))
+predicao$kghaCluster = factor(x = predicao$cluster, levels = c("2","3","1"), labels = c("Baixo", "Médio", "Alto"))
+G1 <- ggplot(predicao, aes(x = kghaCluster, y = kgha, fill = kghaCluster)) + 
+  geom_boxplot() +
+  theme_light() + 
+  labs(x="", y = "Produtividade de soja (kg/ha)", fill = "Cluster") +
+  theme(axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(size = 11),
+        axis.title.y = element_text(size = 14),
+        legend.text = element_text(size = 11),
+        legend.position = "top")
+
 # checking cluster boundaries
 # verificando os limites dos clusters
-predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+predicao |> select(kgha, cluster) |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
 
 
 ### CLUSTER RH2M_mean_70. ####
@@ -283,6 +297,9 @@ g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9)
 g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
   labs(title = "Wss method - RH2M_45-70")
 
+G2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Método do Cotovelo - RH2M_fase2")
+
 ggpubr::ggarrange(g1,g2)
 
 set.seed(123)
@@ -295,9 +312,20 @@ soybean_data <- soybean_data |>
 # fazendo predição para delimitar os limites de cada nível dos clusters
 predicao <- data.frame(RH2M_mean_45.70 = seq(min(soybean_data$RH2M_mean_45.70),max(soybean_data$RH2M_mean_45.70),0.001),
                        cluster = predict(kmcluster, seq(min(soybean_data$RH2M_mean_45.70),max(soybean_data$RH2M_mean_45.70),0.001)))
+predicao$RH2M_phase2 = factor(x = predicao$cluster, levels = c("1","3","2"), labels = c("Baixo", "Médio", "Alto"))
 # verificando os limites dos clusters
-predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+predicao |> select(RH2M_mean_45.70, cluster) |> 
+  group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
 
+G2 <- ggplot(predicao, aes(x = RH2M_phase2, y = RH2M_mean_45.70, fill = RH2M_phase2)) + 
+  geom_boxplot() + 
+  theme_light() + 
+  labs(x="", y = "Umidade relativa (%) na fase 2", fill = "Cluster") +
+  theme(axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(size = 11),
+        axis.title.y = element_text(size = 14),
+        legend.text = element_text(size = 11),
+        legend.position = "top")
 
 
 ### CLUSTER RH2M_mean_0.45 ####
@@ -545,6 +573,9 @@ g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
 g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
   labs(title = "Wss method - T2M_MIN_70+")
 
+G3 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Método do Cotovelo - T2M_MIN_fase3")
+
 ggpubr::ggarrange(g1,g2)
 
 set.seed(123)
@@ -557,8 +588,20 @@ soybean_data <- soybean_data |>
 # fazendo predição para delimitar os limites de cada nível dos clusters
 predicao <- data.frame(T2M_MIN_mean_70. = seq(min(soybean_data$T2M_MIN_mean_70.),max(soybean_data$T2M_MIN_mean_70.),0.001),
                        cluster = predict(kmcluster, seq(min(soybean_data$T2M_MIN_mean_70.),max(soybean_data$T2M_MIN_mean_70.),0.001)))
+predicao$T2M_MIN_phase3 <- factor(x = predicao$cluster, levels = c("2","1","3"), 
+                                  labels = c("Baixo", "Médio", "Alto"))
+G3 <- ggplot(predicao, aes(x = T2M_MIN_phase3, y = T2M_MIN_mean_70., fill = T2M_MIN_phase3)) + 
+  geom_boxplot() +
+  theme_light() + 
+  labs(x="", y = "Temperatura Mínima (°C) na fase 3", fill = "Cluster") +
+  theme(axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(size = 11),
+        axis.title.y = element_text(size = 14),
+        legend.text = element_text(size = 11),
+        legend.position = "top")
 # verificando os limites dos clusters
-predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+predicao |> select(T2M_MIN_mean_70., cluster) |>
+  group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
 
 
 
@@ -838,6 +881,9 @@ g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
 g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
   labs(title = "Wss method - \nALLSKY_SFC_LW_DWN_phase3")
 
+G6 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Método do Cotovelo - Radiação_fase3")
+
 ggpubr::ggarrange(g1,g2)
 
 set.seed(123)
@@ -850,8 +896,20 @@ soybean_data <- soybean_data |>
 # fazendo predição para delimitar os limites de cada nível dos clusters
 predicao <- data.frame(ALLSKY_SFC_LW_DWN_sum_70. = seq(min(soybean_data$ALLSKY_SFC_LW_DWN_sum_70.),max(soybean_data$ALLSKY_SFC_LW_DWN_sum_70.),1),
                        cluster = predict(kmcluster, seq(min(soybean_data$ALLSKY_SFC_LW_DWN_sum_70.),max(soybean_data$ALLSKY_SFC_LW_DWN_sum_70.),1)))
+predicao$RADIATION_phase3 = factor(x = predicao$cluster, levels = c("3","2","1"),
+                                 labels = c("Baixo", "Médio", "Alto"))
+G6 <- ggplot(predicao, aes(x = RADIATION_phase3, y = ALLSKY_SFC_LW_DWN_sum_70., fill = RADIATION_phase3)) + 
+  geom_boxplot() +
+  theme_light() + 
+  labs(x="", y = "Radiação (MJ) na fase 3", fill = "Cluster") +
+  theme(axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(size = 11),
+        axis.title.y = element_text(size = 14),
+        legend.text = element_text(size = 11),
+        legend.position = "top")
 # verificando os limites dos clusters
-predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+predicao |> select(ALLSKY_SFC_LW_DWN_sum_70., cluster) |>
+  group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
 
 
 ### CLUSTER ALLSKY_SFC_LW_DWN_sum_45.70 ####
@@ -934,6 +992,9 @@ g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette") +
 g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
   labs(title = "Wss method - PRECTOT_70+")
 
+G5 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 10) +
+  labs(title = "Método do Cotovelo - PRECTOT_fase3")
+
 ggpubr::ggarrange(g1,g2)
 
 set.seed(123)
@@ -946,8 +1007,20 @@ soybean_data <- soybean_data |>
 # fazendo predição para delimitar os limites de cada nível dos clusters
 predicao <- data.frame(PRECTOT_sum_70. = seq(min(soybean_data$PRECTOT_sum_70.),max(soybean_data$PRECTOT_sum_70.),1),
                        cluster = predict(kmcluster, seq(min(soybean_data$PRECTOT_sum_70.),max(soybean_data$PRECTOT_sum_70.),1)))
+predicao$PRECTOT_phase3 = factor(x = predicao$cluster, levels = c("3","2","1"),
+                                 labels = c("Baixo", "Médio", "Alto"))
+G5 <- ggplot(predicao, aes(x = PRECTOT_phase3, y = PRECTOT_sum_70., fill = PRECTOT_phase3)) + 
+  geom_boxplot() +
+  theme_light() + 
+  labs(x="", y = "Precipitação Total (mm) na fase 3", fill = "Cluster") +
+  theme(axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(size = 11),
+        axis.title.y = element_text(size = 14),
+        legend.text = element_text(size = 11),
+        legend.position = "top")
 # verificando os limites dos clusters
-predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+predicao |> select(PRECTOT_sum_70., cluster) |>
+  group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
 
 
 ### CLUSTER PRECTOT_sum_45.70 ####
@@ -998,6 +1071,9 @@ g1 <- factoextra::fviz_nbclust(dados2, kmeans, method = "silhouette", k.max = 9)
 g2 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
   labs(title = "Wss method - PRECTOT_0-45")
 
+G4 <- factoextra::fviz_nbclust(dados2, kmeans, method = "wss", k.max = 9) +
+  labs(title = "Método do Cotovelo - PRECTOT_fase1")
+
 ggpubr::ggarrange(g1,g2)
 
 set.seed(123)
@@ -1010,9 +1086,22 @@ soybean_data <- soybean_data |>
 # fazendo predição para delimitar os limites de cada nível dos clusters
 predicao <- data.frame(PRECTOT_sum_0.45 = seq(min(soybean_data$PRECTOT_sum_0.45),max(soybean_data$PRECTOT_sum_0.45),1),
                        cluster = predict(kmcluster, seq(min(soybean_data$PRECTOT_sum_0.45),max(soybean_data$PRECTOT_sum_0.45),1)))
+predicao$PRECTOT_phase1 = factor(x = predicao$cluster, levels = c("2","1","3"),
+                                 labels = c("Baixo", "Médio", "Alto"))
+G4 <- ggplot(predicao, aes(x = PRECTOT_phase1, y = PRECTOT_sum_0.45, fill = PRECTOT_phase1)) + 
+  geom_boxplot() +
+  theme_light() + 
+  labs(x="", y = "Precipitação Total (mm) na fase 1", fill = "Cluster") +
+  theme(axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(size = 11),
+        axis.title.y = element_text(size = 14),
+        legend.text = element_text(size = 11),
+        legend.position = "top")
 # verificando os limites dos clusters
-predicao |> group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
+predicao |> select(PRECTOT_sum_0.45, cluster) |>
+  group_by(cluster) |> summarise_all(.funs = c(min, max, mean, length))
 
 
+ggpubr::ggarrange(G1,G2,G3,G4,G5,G6, nrow = 3, ncol = 2)
 
 write.csv(x = soybean_data, file = "Input/soybean_data-v3.csv", row.names = FALSE)
